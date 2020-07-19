@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+  <script>
+      window.APP_STATE = {
+        selectedTab: "{{ selected_tab }}",
+        tabStatus: "LOADED",
+        session: {
+            authenticated: false,
+            user: null
+        },
+        errorMessage: null
+    }
+  </script>
+  <div id="app"></div>
+  <script src="/static/js/app.js"></script>
+{% endblock %}
