@@ -78,28 +78,73 @@ class UserAddressesAPI(RESTView):
 
     @permissions.can_list_addresses_and_transactions
     def get(self, user_id, **kwargs):
-        return []
+        addresses_data = list(
+            map(
+                lambda address: formatter.make(
+                    address, formatting.address_format),
+                api.get_user_addresses(user_id)))
+        return addresses_data
+
+    @permissions.can_list_addresses_and_transactions
+    def post(self, user_id, **kwargs):
+        data = request.get_json()
+        address_string = data.get("address")
+        address = api.get_or_create_address(user_id, address_string)
+        address_data = formatter.make(address, formatting.address_format)
+
+        return address_data
 
 
 class UserAddressesModelAPI(RESTView):
 
     @permissions.can_list_addresses_and_transactions
     def get(self, user_id, address_id, **kwargs):
-        return []
+        address = api.get_user_address(user_id, address_id)
+        if address is None:
+            raise APIException(404, 'Not found')
+        address_data = formatter.make(address, formatting.address_format)
+        return address_data
+
+
+class UserAddressesModelUpdateAPI(RESTView):
+
+    @permissions.can_list_addresses_and_transactions
+    def get(self, user_id, address_id, **kwargs):
+        address = api.get_user_address(user_id, address_id)
+        if address is None:
+            raise APIException(404, 'Not found')
+        address = api.update_user_address(user_id, address_id)
+        address_data = formatter.make(address, formatting.address_format)
+        return address_data
 
 
 class UserAddressTransactionsAPI(RESTView):
 
     @permissions.can_list_addresses_and_transactions
     def get(self, user_id, address_id, **kwargs):
-        return []
+        address = api.get_user_address(user_id, address_id)
+        if address is None:
+            raise APIException(404, 'Not found')
+
+        address_transactions = api.get_user_address_transactions(user_id, address_id)
+        address_transactions_data = list(map(
+            lambda adtx: formatter.make(adtx, formatting.address_transaction_format),
+            address_transactions))
+
+        return address_transactions_data
 
 
 class UserAddressTransactionsModelAPI(RESTView):
 
     @permissions.can_list_addresses_and_transactions
-    def get(self, user_id, address_id, transaction_id, **kwargs):
-        return []
+    def get(self, user_id, address_id, address_transaction_id, **kwargs):
+        address = api.get_user_address(user_id, address_id)
+        if address is None:
+            raise APIException(404, 'Not found')
+        address_transaction = api.get_address_transaction(address_transaction_id)
+        address_transaction_data = formatter.make(address_transaction, formatting.address_transaction_format)
+
+        return address_transaction_data
 
 
 bp.add_url_rule(
@@ -122,10 +167,13 @@ bp.add_url_rule(
     view_func=UserAddressesAPI.as_view('user_addresses_view'))
 bp.add_url_rule(
     '/v1/users/<int:user_id>/addresses/<int:address_id>',
-    view_func=UserAddressesAPI.as_view('user_addresses_model_view'))
+    view_func=UserAddressesModelAPI.as_view('user_addresses_model_view'))
+bp.add_url_rule(
+    '/v1/users/<int:user_id>/addresses/<int:address_id>/get_updates',
+    view_func=UserAddressesModelUpdateAPI.as_view('user_addresses_model_update_view'))
 bp.add_url_rule(
     '/v1/users/<int:user_id>/addresses/<int:address_id>/transactions',
     view_func=UserAddressTransactionsAPI.as_view('user_address_transactions_view'))
 bp.add_url_rule(
-    '/v1/users/<int:user_id>/addresses/<int:address_id>/transactions/<int:transaction_id>',
+    '/v1/users/<int:user_id>/addresses/<int:address_id>/transactions/<int:address_transaction_id>',
     view_func=UserAddressTransactionsModelAPI.as_view('user_address_transactions_model_view'))

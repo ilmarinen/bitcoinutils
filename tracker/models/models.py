@@ -57,12 +57,24 @@ class Group(db.Model):
         return '<Group {}>'.format(self.username)
 
 
+class Membership(db.Model):
+    __tablename__ = "memberships"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"))
+
+    user = orm.relationship(User, backref=orm.backref("orders", cascade="all, delete-orphan"))
+    group = orm.relationship(Group, backref=orm.backref("groups", cascade="all, delete-orphan"))
+
+
 class Address(db.Model):
     __tablename__ = "addresses"
 
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(40), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    final_balance = db.Column(db.Integer)
 
 
 class Transaction(db.Model):
@@ -85,6 +97,10 @@ class AddressTransaction(db.Model):
     transaction = orm.relationship(
         Transaction,
         backref=orm.backref("transactions", cascade="all, delete-orphan"))
+
+    @property
+    def hash(self):
+        return self.transaction.hash
 
 
 @login.user_loader

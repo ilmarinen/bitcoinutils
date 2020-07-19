@@ -1,3 +1,4 @@
+from blockchain import blockexplorer
 from tracker import db
 from tracker.models import models
 from flask_login import login_user
@@ -111,3 +112,74 @@ def authenticate(username, password):
         failed_login(user)
 
     return False
+
+
+def add_address_transaction(address, blockchain_transaction):
+    transaction = models.Transaction.query.filter_by(hash=blockchain_transaction.hash).first()
+    if transaction is None:
+        transaction = models.Transaction(hash=blockchain_transaction.hash)
+        db.session.add(transaction)
+        db.session.flush()
+
+    address_transaction = models.AddressTransaction.query.filter_by(
+        address_id=address.id, transaction_id=transaction.id).first()
+    if address_transaction is None:
+        address_transaction = models.AddressTransaction(address_id=address.id, transaction_id=transaction.id)
+        db.session.add(address_transaction)
+        db.session.flush()
+        db.session.commit()
+
+    return address_transaction
+
+
+def get_or_create_address(user_id, address_string):
+    user = models.User.query.get(user_id)
+    if user is None:
+        raise APIException(404, "Not found.")
+
+    address = models.Address.query.filter_by(address=address_string).first()
+    if address is None:
+        blockchain_address = blockexplorer.get_address(address_string)
+        address = models.Address(
+            address=address_string,
+            user_id=user.id,
+            final_balance=blockchain_address.final_balance)
+        db.session.add(address)
+        db.session.commit()
+        for blockchain_transaction in blockchain_address.transactions:
+            add_address_transaction(address, blockchain_transaction)
+
+    return address
+
+
+def get_user_addresses(user_id):
+    addresses = models.Address.query.filter_by(user_id=user_id).all()
+    return addresses
+
+
+def get_user_address(user_id, address_id):
+    address = models.Address.query.filter_by(user_id=user_id, id=address_id).first()
+    return address
+
+
+def update_user_address(user_id, address_id):
+    address = get_user_address(user_id, address_id)
+    blockchain_address = blockexplorer.get_address(address.address)
+    address.final_balance = blockchain_address.final_balance
+    db.session.add(address)
+    db.session.commit()
+    for blockchain_transaction in blockchain_address.transactions:
+        add_address_transaction(address, blockchain_transaction)
+
+    return address
+
+
+def get_user_address_transactions(user_id, address_id):
+    address = get_user_address(user_id, address_id)
+    address_transactions = models.AddressTransaction.query.filter_by(address_id=address.id).all()
+    return address_transactions
+
+
+def get_address_transaction(address_transaction_id):
+    address_transactions = models.AddressTransaction.query.filter_by(id=address_transaction_id).all()
+    return address_transactions

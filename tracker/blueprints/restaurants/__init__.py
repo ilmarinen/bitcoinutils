@@ -1,1 +1,0 @@
-from .rest import bp as rest_bp
