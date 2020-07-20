@@ -6,7 +6,7 @@ module.exports = {
   performance: {
     hints: false
   },
-  watch: true,
+  watch: false,
   plugins: [  
     new webpack.ProvidePlugin({
       $: "jquery",

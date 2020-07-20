@@ -117,7 +117,7 @@ def generate_deployment_configs(host, application_root, docker):
     systemd_unit_template_file = "../deployment/systemd-unit/tracker.service"
     with open("./deployment/nginx-config/tracker-site", "r") as nginx_site_template_file:
         nginx_site_template = jinja2.Template(nginx_site_template_file.read())
-    nginx_site_text = nginx_site_template.render(host_name=host, endpoint_root=application_root)
+    nginx_site_text = nginx_site_template.render(host_name=host, tracker_root=application_root)
 
     with open("./deployment/systemd-unit/tracker.service", "r") as systemd_unit_template_file:
         systemd_unit_template = jinja2.Template(systemd_unit_template_file.read())
