@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import {makePostCall, makeGetCall, makePutCall, makeDeleteCall} from "./ajax";
-import Upload from "./Upload.jsx";
 
 
 class UserProfile extends Component {
@@ -74,6 +73,9 @@ class UserProfile extends Component {
 
   handleAddUserAddress(evt) {
     this.props.addUserAddress(this.props.user.id, this.state.newAddress);
+    this.setState({
+      newAddress: ""
+    });
   }
 
   handleUpdateUserAddress(address) {
@@ -128,8 +130,7 @@ class UserProfile extends Component {
           <div className="card info-card bg-border-secondary mb-3">
             <div className="card-header">{this.state.user.username}</div>
             <div className="card-body text-primary">
-              <h6 className="card-text">{this.state.user.firstname}</h6>
-              <h6 className="card-text">{this.state.user.lastname}</h6>
+              <h6 className="card-text">{`${this.state.user.firstname} ${this.state.user.lastname}`}</h6>
               <div className="card-body text-primary">
                 <input type="text" className="form-control form-field" onChange={this.handleNewAddressChange} value={this.state.newAddress} />
                  <a href="#" className="btn btn-primary" onClick={this.handleAddUserAddress}>Add Address</a>

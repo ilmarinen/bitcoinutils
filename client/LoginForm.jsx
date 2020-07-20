@@ -33,7 +33,9 @@ class LoginForm extends Component {
     })
   }
 
-  loginClick() {
+  loginClick(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
     this.props.loginHandler(this.state.username, this.state.password);
   }
 

@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name {{ host_name }};
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:{{tracker_root}}/tracker.sock;
+    }
+}

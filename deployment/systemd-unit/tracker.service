@@ -1,0 +1,9 @@
+[Unit]
+Description=uWSGI instance to serve tracker app
+
+[Service]
+ExecStartPre=-/bin/bash -c 'mkdir -p /run/uwsgi; chown www-data:www-data /run/uwsgi'
+ExecStart=/bin/bash -c 'cd {{ tracker_root }}; uwsgi --ini tracker.ini -H {{ tracker_root }}/venv'
+
+[Install]
+WantedBy=multi-user.target

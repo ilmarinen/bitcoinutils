@@ -28,3 +28,8 @@ package-lock.json
 .fuse*
 
 uploads/
+
+deployment/tracker-site
+deployment/tracker.service
+
+./tracker.ini

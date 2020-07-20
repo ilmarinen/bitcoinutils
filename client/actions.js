@@ -52,7 +52,7 @@ function doLogout() {
     return function(dispatch) {
         makePostCall("api/v1/users/logout")
           .then(res => {dispatch(logoutSuccessful()), dispatch(selectLogin())})
-          .fail(res => dispatch(logoutFailedf(error)));
+          .fail(error => dispatch(logoutFailed(error)));
     }
 }
 
